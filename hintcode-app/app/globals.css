@@ -1,0 +1,153 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+}
+
+@layer base {
+  :root {
+    --background: #0f0f0f;
+    --foreground: #e8e8e8;
+    --card: #1a1a1a;
+    --card-foreground: #e8e8e8;
+    --popover: #1a1a1a;
+    --popover-foreground: #e8e8e8;
+    --primary: #f59e0b;
+    --primary-foreground: #0f0f0f;
+    --secondary: #2a2a2a;
+    --secondary-foreground: #e8e8e8;
+    --muted: #222222;
+    --muted-foreground: #888888;
+    --accent: #f59e0b;
+    --accent-foreground: #0f0f0f;
+    --destructive: #ef4444;
+    --border: #2a2a2a;
+    --input: #2a2a2a;
+    --ring: #f59e0b;
+    --radius: 0.625rem;
+    /* HintCode specific */
+    --panel-bg: #1a1a1a;
+    --panel-border: #2a2a2a;
+    --amber: #f59e0b;
+    --amber-dim: #78450a;
+    --easy: #22c55e;
+    --medium: #f59e0b;
+    --hard: #ef4444;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: dark;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    background-color: #0f0f0f;
+    color: #e8e8e8;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3a3a3a;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f59e0b55;
+  }
+
+  /* Problem description HTML styles */
+  .problem-content pre {
+    background: #111111;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    margin: 8px 0;
+  }
+
+  .problem-content code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #252525;
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: #f59e0b;
+  }
+
+  .problem-content pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+
+  .problem-content p {
+    margin: 6px 0;
+    line-height: 1.6;
+    color: #d0d0d0;
+  }
+
+  .problem-content ul,
+  .problem-content ol {
+    padding-left: 20px;
+    margin: 6px 0;
+    color: #d0d0d0;
+  }
+
+  .problem-content li {
+    margin: 3px 0;
+    line-height: 1.5;
+  }
+
+  .problem-content strong {
+    color: #e8e8e8;
+    font-weight: 600;
+  }
+
+  .problem-content em {
+    color: #b0b0b0;
+  }
+
+  .problem-content .example-block,
+  .problem-content .example {
+    background: #141414;
+    border-left: 3px solid #f59e0b;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    margin: 10px 0;
+  }
+
+  /* Panel resize handle */
+  [data-panel-resize-handle-id] {
+    background: #2a2a2a;
+    transition: background 0.2s;
+  }
+
+  [data-panel-resize-handle-id]:hover,
+  [data-panel-resize-handle-id][data-resize-handle-active] {
+    background: #f59e0b44;
+  }
+}
