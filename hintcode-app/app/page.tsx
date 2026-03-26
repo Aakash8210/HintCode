@@ -9,23 +9,14 @@ import {
 } from "@/components/ui/resizable";
 
 // Dynamic imports to avoid SSR issues with Monaco
-const ProblemPanel = dynamic(() => import("@/components/ProblemPanel"), {
-  ssr: false,
-  loading: () => <PanelSkeleton label="Problem" />,
-});
+import ProblemPanel from "@/components/ProblemPanel";
+import HintPanel from "@/components/HintPanel";
+import SolutionModal from "@/components/SolutionModal";
 
+// ONLY CodeEditor needs to be dynamic to avoid Monaco's window dependency
 const CodeEditor = dynamic(() => import("@/components/CodeEditor"), {
   ssr: false,
   loading: () => <PanelSkeleton label="Editor" />,
-});
-
-const HintPanel = dynamic(() => import("@/components/HintPanel"), {
-  ssr: false,
-  loading: () => <PanelSkeleton label="AI Assistant" />,
-});
-
-const SolutionModal = dynamic(() => import("@/components/SolutionModal"), {
-  ssr: false,
 });
 
 function PanelSkeleton({ label }: { label: string }) {
@@ -46,7 +37,7 @@ export default function Home() {
 
       {/* 3-panel layout */}
       <div className="flex-1 overflow-hidden p-2 gap-2">
-        <ResizablePanelGroup direction="horizontal" className="h-full gap-2">
+        <ResizablePanelGroup orientation="horizontal" className="h-full gap-2">
           {/* Left: Problem Panel */}
           <ResizablePanel defaultSize={33} minSize={20} className="rounded-xl overflow-hidden border border-[#2a2a2a] bg-[#1a1a1a]">
             <ProblemPanel />

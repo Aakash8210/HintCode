@@ -52,37 +52,72 @@ import collections
 import itertools
 import functools
 import math
-
-${userCode}
-
 import sys
 
+# User-provided Solution code
+${userCode}
+
 def main():
-    input_data = """${testInput.replace(/"/g, '\\"')}"""
-    lines = input_data.strip().split('\\n')
+    # Use triple-quoted string to handle newlines in testInput
+    # Escape any existing triple quotes or backslashes
+    input_str = r"""${testInput.replace(/\\/g, "\\\\").replace(/"""/g, '\\"\\"\\"') }"""
+    lines = [L.strip() for L in input_str.strip().split('\\n') if L.strip()]
     
     sol = Solution()
     
-    try:
-        args = [eval(line) for line in lines]
-        import inspect
-        methods = [m for m in dir(sol) if not m.startswith('_')]
-        if set(methods) - {"main"}:
-            method_name = list(set(methods) - {"main"})[0]
-            func = getattr(sol, method_name)
+    # Identify which method to call
+    methods = [m for m in dir(sol) if not m.startswith('_') and callable(getattr(sol, m))]
+    if not methods:
+        print("Error: No solution method found in Class Solution", file=sys.stderr)
+        return
+    
+    # Prefer the first non-main method
+    method_name = methods[0]
+    for m in methods:
+        if m != 'main':
+            method_name = m
+            break
             
-            # If the AI generated test case gave us exactly one dict, unpack it as kwargs
-            if len(args) == 1 and isinstance(args[0], dict):
-                result = func(**args[0])
-            else:
-                result = func(*args)
-                
-            print(result)
+    func = getattr(sol, method_name)
+    
+    try:
+        # Prepare arguments
+        args = []
+        for line in lines:
+            line = line.strip()
+            if not line: continue
+            
+            # Simple heuristic: if line is not a literal but looks like assignment "k=v", 
+            # we already tried to strip labels in JS but let's be double sure.
+            # However, evaling is best for literals like [1,2,3] or 10
+            try:
+                args.append(eval(line))
+            except:
+                # If eval fails, maybe it's multiple values on one line? 
+                # LeetCode sometimes does [1,2,3], 1
+                try:
+                    # try wrapping in tuple if it contains commas
+                    args.extend(eval(f"({line},)"))
+                except:
+                    # fallback to raw line as string
+                    args.append(line)
+        
+        result = func(*args)
+        
+        # Format result for comparison
+        if result is None:
+            print("null")
+        elif isinstance(result, bool):
+            print(str(result).lower())
         else:
-            print("Implementation not found")
+            print(result)
+            
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
+        import traceback
+        # traceback.print_exc(file=sys.stderr)
 
-main()
+if __name__ == "__main__":
+    main()
 `;
 }

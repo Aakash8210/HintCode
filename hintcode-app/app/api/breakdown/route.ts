@@ -22,7 +22,16 @@ Return this exact JSON structure:
 }`;
 
     const raw = await askGemini(system, user);
-    const breakdown = parseJSON(raw);
+    let breakdown = parseJSON<any>(raw);
+    
+    // Normalize to strings to prevent React 'Objects are not valid as a React child' errors
+    if (breakdown && typeof breakdown === 'object') {
+      for (const key in breakdown) {
+        if (typeof breakdown[key] !== 'string') {
+          breakdown[key] = JSON.stringify(breakdown[key]);
+        }
+      }
+    }
 
     return NextResponse.json({ breakdown });
   } catch (error) {

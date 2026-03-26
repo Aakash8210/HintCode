@@ -12,7 +12,7 @@ export default function TestResultsTable({ results, loading }: Props) {
     return (
       <div className="p-4 flex items-center gap-3 bg-[#141414]">
         <span className="w-4 h-4 border-2 border-[#333] border-t-amber-500 rounded-full animate-spin flex-shrink-0" />
-        <p className="text-xs text-[#666]">Running tests against Judge0...</p>
+        <p className="text-xs text-[#666]">Running tests...</p>
       </div>
     );
   }
@@ -73,7 +73,7 @@ export default function TestResultsTable({ results, loading }: Props) {
                 }`}
               >
                 <td className="px-4 py-2 text-[#555] font-mono">{i + 1}</td>
-                <td className="px-4 py-2 font-mono text-[#999] max-w-32 truncate">{r.input}</td>
+                <td className="px-4 py-2 font-mono text-[#999] whitespace-pre-wrap break-all min-w-[120px]">{r.input}</td>
                 <td className="px-4 py-2 font-mono text-green-400">{r.expected}</td>
                 <td className="px-4 py-2 font-mono text-[#ccc]">
                   {r.actual || (r.error ? "—" : "—")}

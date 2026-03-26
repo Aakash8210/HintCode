@@ -68,11 +68,21 @@ export async function POST(req: NextRequest) {
 
           const expected = ((test as any).expected || (test as any).output).trim();
 
+          // Normalize for comparison: strip whitespace, handle Python bool/None casing
+          const normalize = (s: string) =>
+            s
+              .replace(/\s+/g, "")
+              .replace(/True/g, "true")
+              .replace(/False/g, "false")
+              .replace(/None/g, "null");
+
+          const isPass = normalize(output) === normalize(expected);
+
           return {
             input: test.input,
             expected,
             actual: output,
-            status: output === expected ? ("pass" as const) : ("fail" as const),
+            status: isPass ? ("pass" as const) : ("fail" as const),
           };
         } catch (err) {
           return {

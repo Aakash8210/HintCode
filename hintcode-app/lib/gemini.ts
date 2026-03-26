@@ -8,20 +8,28 @@ export async function askGemini(
   systemPrompt: string,
   userPrompt: string
 ): Promise<string> {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: userPrompt,
-    config: {
-      systemInstruction: systemPrompt,
-      temperature: 0.2,
-    },
-  });
+  try {
+    const response = await ai.models.generateContent({
+      model: "models/gemini-flash-latest",
+      contents: userPrompt,
+      config: {
+        systemInstruction: systemPrompt,
+        temperature: 0.2,
+      },
+    });
 
-  if (!response.text) {
-    throw new Error("Unexpected empty response from Gemini");
+    if (!response.text) {
+      console.error("Gemini Response Error: Empty text", response);
+      throw new Error("Unexpected empty response from Gemini");
+    }
+
+    return response.text;
+  } catch (error: any) {
+    console.error("Gemini API Error details:", error);
+    // Extract more useful error messages if available
+    const errorMessage = error.response?.data?.error?.message || error.message || "Unknown Gemini API error";
+    throw new Error(errorMessage);
   }
-
-  return response.text;
 }
 
 export function parseJSON<T>(raw: string): T {
