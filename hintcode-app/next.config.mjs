@@ -3,7 +3,16 @@ const nextConfig = {
   reactStrictMode: true,
   // Allow LeetCode images if any are embedded
   images: {
-    domains: ["assets.leetcode.com", "leetcode.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "assets.leetcode.com",
+      },
+      {
+        protocol: "https",
+        hostname: "leetcode.com",
+      },
+    ],
   },
   // Increase payload limits for Claude responses
   experimental: {
