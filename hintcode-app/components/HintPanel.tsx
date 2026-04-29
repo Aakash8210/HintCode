@@ -3,7 +3,7 @@
 import { useStore } from "@/lib/store";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function HintPanel() {
   const {
@@ -19,14 +19,18 @@ export default function HintPanel() {
     setShowSolutionModal,
   } = useStore();
 
+  const [retrySeconds, setRetrySeconds] = useState<number>(0);
+
   const [patternRevealed, setPatternRevealed] = useState(false);
+  const realHints = hints.filter((h) => h.number !== -1);
+  const realHintCount = realHints.length;
 
   const handleNextHint = async () => {
     if (!problem) {
       toast.error("Load a problem first");
       return;
     }
-    if (hints.length >= 5) {
+    if (realHintCount >= 5) {
       toast.info("All 5 hints already revealed");
       return;
     }
@@ -38,13 +42,25 @@ export default function HintPanel() {
         body: JSON.stringify({
           problem_title: problem.title,
           problem_description: problem.content,
-          hint_number: hints.length + 1,
+          hint_number: realHintCount + 1,
           user_code: userCode[currentLang] || "",
         }),
       });
+
+      if (res.status === 429) {
+        // Quota exceeded — read Retry-After header or body fallback
+        const ra = res.headers.get("Retry-After");
+        let secs = ra ? parseInt(ra, 10) : undefined;
+        const body = await res.json().catch(() => ({}));
+        secs = secs || body.retryAfter || body.retry_after || body.retrySeconds || 30;
+        setRetrySeconds(Number(secs));
+        toast.error(`Quota exceeded. Retry in ${secs}s`);
+        return;
+      }
+
       const data = await res.json();
       if (data.hint) {
-        addHint({ number: hints.length + 1, content: data.hint });
+        addHint({ number: realHintCount + 1, content: data.hint });
       } else {
         toast.error(data.error ?? "Failed to get hint");
       }
@@ -54,6 +70,24 @@ export default function HintPanel() {
       setIsLoadingHint(false);
     }
   };
+
+  useEffect(() => {
+    if (!retrySeconds) return;
+    const t = setInterval(() => {
+      setRetrySeconds((s) => {
+        if (s <= 1) {
+          clearInterval(t);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, [retrySeconds]);
+
+  useEffect(() => {
+    setPatternRevealed(false);
+  }, [problem?.titleSlug]);
 
   const handleDebug = async () => {
     if (!problem) {
@@ -174,9 +208,9 @@ export default function HintPanel() {
 
         {/* Hint cards */}
         <AnimatePresence>
-          {hints.map((hint) => (
+          {hints.map((hint, idx) => (
             <motion.div
-              key={`hint-${hint.number}`}
+              key={`hint-${hint.number}-${idx}`}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
@@ -206,7 +240,7 @@ export default function HintPanel() {
           </motion.div>
         )}
 
-        {hints.length >= 5 && hints[0].number !== -1 && (
+        {realHintCount >= 5 && (
           <div className="text-center py-3">
             <p className="text-xs text-[#555]">
               All 5 hints revealed. Try coding it or view the full solution.
@@ -219,7 +253,7 @@ export default function HintPanel() {
       <div className="border-t border-[#2a2a2a] p-3 space-y-2 flex-shrink-0">
         <button
           onClick={handleNextHint}
-          disabled={!problem || isLoadingHint || hints.length >= 5}
+          disabled={!problem || isLoadingHint || realHintCount >= 5 || retrySeconds > 0}
           className="w-full bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isLoadingHint ? (
@@ -227,8 +261,10 @@ export default function HintPanel() {
               <span className="w-3 h-3 border border-black border-t-transparent rounded-full animate-spin" />
               Thinking...
             </>
+          ) : retrySeconds > 0 ? (
+            <>⏳ Retry in {retrySeconds}s</>
           ) : (
-            <>💡 {hints.length === 0 ? "Get First Hint" : `Next Hint (${hints.length}/5)`}</>
+            <>💡 {realHintCount === 0 ? "Get First Hint" : `Next Hint (${realHintCount}/5)`}</>
           )}
         </button>
 

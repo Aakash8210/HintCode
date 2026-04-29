@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askGemini, parseJSON } from "@/lib/gemini";
+import { askGemini, getGeminiErrorMeta, parseJSON } from "@/lib/gemini";
 
 export async function POST(req: NextRequest) {
   try {
     const { problem_description, user_code, language } = await req.json();
+    if (
+      typeof problem_description !== "string" ||
+      !problem_description.trim() ||
+      typeof language !== "string" ||
+      !language.trim()
+    ) {
+      return NextResponse.json(
+        { error: "problem_description and language are required" },
+        { status: 400 }
+      );
+    }
 
     const system = `You are a DSA debugging assistant. Analyze buggy code and give directional feedback only. NEVER provide the corrected or working code. Help the student understand what's wrong and point them in the right direction. Return ONLY valid JSON.`;
 
@@ -12,7 +23,7 @@ ${problem_description}
 
 Student's ${language} code:
 \`\`\`
-${user_code}
+${typeof user_code === "string" ? user_code : ""}
 \`\`\`
 
 Analyze this code and return ONLY this JSON:
@@ -27,7 +38,14 @@ Analyze this code and return ONLY this JSON:
 
     return NextResponse.json({ debug });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    const { message, status, retryAfter } = getGeminiErrorMeta(error);
+    const headers: Record<string, string> = {};
+    if (status === 429 && retryAfter) headers["Retry-After"] = String(retryAfter);
+    return NextResponse.json(
+      status === 429 && retryAfter
+        ? { error: message, retryAfter }
+        : { error: message },
+      { status: status ?? 500, headers }
+    );
   }
 }

@@ -36,24 +36,36 @@ export default function Home() {
       <Navbar />
 
       {/* 3-panel layout */}
-      <div className="flex-1 overflow-hidden p-2 gap-2">
+      <div className="flex flex-1 overflow-hidden p-2 gap-2">
         <ResizablePanelGroup orientation="horizontal" className="h-full gap-2">
           {/* Left: Problem Panel */}
-          <ResizablePanel defaultSize={33} minSize={20} className="rounded-xl overflow-hidden border border-[#2a2a2a] bg-[#1a1a1a]">
+          <ResizablePanel
+            defaultSize={33}
+            minSize={26}
+            className="min-w-[320px] rounded-xl overflow-hidden border border-[#2a2a2a] bg-[#1a1a1a]"
+          >
             <ProblemPanel />
           </ResizablePanel>
 
           <ResizableHandle withHandle className="w-1.5 my-auto bg-[#2a2a2a] hover:bg-amber-500/40 transition-colors mx-0.5" />
 
           {/* Middle: Code Editor */}
-          <ResizablePanel defaultSize={42} minSize={25} className="rounded-xl overflow-hidden border border-[#2a2a2a] bg-[#1a1a1a]">
+          <ResizablePanel
+            defaultSize={42}
+            minSize={20}
+            className="min-w-[360px] rounded-xl overflow-hidden border border-[#2a2a2a] bg-[#1a1a1a]"
+          >
             <CodeEditor />
           </ResizablePanel>
 
           <ResizableHandle withHandle className="w-1.5 my-auto bg-[#2a2a2a] hover:bg-amber-500/40 transition-colors mx-0.5" />
 
           {/* Right: Hint Panel */}
-          <ResizablePanel defaultSize={25} minSize={20} className="rounded-xl overflow-hidden border border-[#2a2a2a] bg-[#1a1a1a]">
+          <ResizablePanel
+            defaultSize={25}
+            minSize={16}
+            className="min-w-[260px] rounded-xl overflow-hidden border border-[#2a2a2a] bg-[#1a1a1a]"
+          >
             <HintPanel />
           </ResizablePanel>
         </ResizablePanelGroup>

@@ -14,7 +14,11 @@ export async function POST(req: NextRequest) {
 
     // Check if query is a number
     if (/^\d+$/.test(trimmed)) {
-      problem = await fetchProblemByNumber(parseInt(trimmed));
+      const num = parseInt(trimmed, 10);
+      if (!Number.isFinite(num) || num <= 0) {
+        return NextResponse.json({ error: "Problem number must be positive" }, { status: 400 });
+      }
+      problem = await fetchProblemByNumber(num);
     } else {
       // Convert title to slug: "Two Sum" → "two-sum"
       const slug = trimmed

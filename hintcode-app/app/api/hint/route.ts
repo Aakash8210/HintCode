@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askGemini } from "@/lib/gemini";
+import { askGemini, getGeminiErrorMeta } from "@/lib/gemini";
 
 const HINT_INSTRUCTIONS = [
   "Hint 1: Ask a pure conceptual question that makes them think about what the problem is really asking. Do NOT mention any data structures or algorithms.",
@@ -13,6 +13,18 @@ export async function POST(req: NextRequest) {
   try {
     const { problem_title, problem_description, hint_number, user_code } =
       await req.json();
+    if (
+      typeof problem_title !== "string" ||
+      !problem_title.trim() ||
+      typeof problem_description !== "string" ||
+      !problem_description.trim() ||
+      !Number.isInteger(hint_number)
+    ) {
+      return NextResponse.json(
+        { error: "problem_title, problem_description, and integer hint_number are required" },
+        { status: 400 }
+      );
+    }
 
     const hintIdx = Math.min(Math.max(1, hint_number), 5) - 1;
 
@@ -26,7 +38,7 @@ Problem description (HTML):
 ${problem_description}
 
 Student's current code:
-${user_code || "(no code written yet)"}
+${typeof user_code === "string" && user_code.trim() ? user_code : "(no code written yet)"}
 
 Generate hint ${hint_number} following your system instructions exactly. Be concise and Socratic.`;
 
@@ -34,7 +46,14 @@ Generate hint ${hint_number} following your system instructions exactly. Be conc
 
     return NextResponse.json({ hint: hint.trim() });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    const { message, status, retryAfter } = getGeminiErrorMeta(error);
+    const headers: Record<string, string> = {};
+    if (status === 429 && retryAfter) headers["Retry-After"] = String(retryAfter);
+    return NextResponse.json(
+      status === 429 && retryAfter
+        ? { error: message, retryAfter }
+        : { error: message },
+      { status: status ?? 500, headers }
+    );
   }
 }
