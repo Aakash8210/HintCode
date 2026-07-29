@@ -1,0 +1,59 @@
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import { ClerkProvider } from "@clerk/nextjs";
+import "./globals.css";
+import { Toaster } from "sonner";
+
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+});
+
+export const metadata: Metadata = {
+  title: "HintCode — DSA Learning Platform",
+  description: "Master Data Structures & Algorithms with AI-powered Socratic hints. Never see the answer, always grow.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const app = (
+    <html lang="en" className="dark">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0f0f0f] text-[#e8e8e8]`}
+      >
+        {children}
+        <Toaster
+          theme="dark"
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: "#1a1a1a",
+              border: "1px solid #2a2a2a",
+              color: "#e8e8e8",
+            },
+          }}
+        />
+      </body>
+    </html>
+  );
+
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    return app;
+  }
+
+  return (
+    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+      {app}
+    </ClerkProvider>
+  );
+}
